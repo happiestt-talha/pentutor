@@ -10,6 +10,14 @@
 !.yarn/releases
 !.yarn/versions
 
+# django
+/django-samples
+/src/django-samples
+
+# django backend
+/src/django-backend
+
+
 # testing
 /coverage
 

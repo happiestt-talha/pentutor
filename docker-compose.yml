@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_DJANGO_API_BASE_URL=${DJANGO_API_BASE_URL:-https://pen-tutor-api.onrender.com}
+      - NEXT_PUBLIC_SIGNALING_URL=${SIGNALING_URL:-ws://localhost:8080/ws}
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    depends_on:
+      - signaling
+
+  signaling:
+    build:
+      context: ./signaling
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - SIGNALING_JWT_SECRET=${SIGNALING_JWT_SECRET:-your-jwt-secret-here}
+      - DJANGO_API_BASE_URL=${DJANGO_API_BASE_URL:-https://pen-tutor-api.onrender.com}
+      - TURN_SERVERS_JSON=${TURN_SERVERS_JSON:-[{"urls":["stun:stun.l.google.com:19302"]}]}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - coturn
+      - redis
+
+  coturn:
+    image: instrumentisto/coturn:latest
+    ports:
+      - "3478:3478/tcp"
+      - "3478:3478/udp"
+      - "5349:5349/tcp"
+      - "5349:5349/udp"
+      - "49152-65535:49152-65535/udp"
+    environment:
+      - EXTERNAL_IP=${EXTERNAL_IP:-127.0.0.1}
+      - TURN_SECRET=${TURN_SECRET:-your-turn-secret}
+      - REALM=${REALM:-localhost}
+    volumes:
+      - ./infra/coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    command: ["-c", "/etc/coturn/turnserver.conf"]
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
