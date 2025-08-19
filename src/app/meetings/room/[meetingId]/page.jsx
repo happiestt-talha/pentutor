@@ -242,4 +242,3 @@ export default function MeetingRoomPage() {
 }
 
 // inside MeetingRoomPage return temporarily:
-return <div>smoke test</div>

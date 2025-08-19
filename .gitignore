@@ -17,6 +17,8 @@
 # django backend
 /src/django-backend
 
+/src/app/meetings/
+src/app/meetings/
 
 # testing
 /coverage
