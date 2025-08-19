@@ -32,6 +32,7 @@ export default function TopNavigation() {
     { name: "Courses", href: "/courses" },
     { name: "Our Tutors", href: "/our-tutors" },
     { name: "Job Board", href: "/jobs" },
+    { name: "Get Registered", href: "/profile" },
     // { name: "Blog", href: "/blog" },
     // { name: "Contact Us", href: "/contact" },
   ]
@@ -52,7 +53,7 @@ export default function TopNavigation() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary hover:bg-primary/20 rounded-md transition-colors"
               >
                 {item.name}
               </Link>
@@ -111,7 +112,7 @@ export default function TopNavigation() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-primary/20 rounded-md"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -123,14 +124,14 @@ export default function TopNavigation() {
                   <div className="space-y-2">
                     <Link
                       href={user?.role === "teacher" ? "/tutor/dashboard" : "/student/dashboard"}
-                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md"
+                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-primary/20 rounded-md"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Dashboard
                     </Link>
                     <Link
                       href={user?.role === "teacher" ? "/tutor/profile" : "/student/profile"}
-                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md"
+                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-primary/20 rounded-md"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Profile
@@ -149,14 +150,14 @@ export default function TopNavigation() {
                   <div className="space-y-2">
                     <Link
                       href="/auth"
-                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md"
+                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-primary/20 rounded-md"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Login
                     </Link>
                     <Link
                       href="/auth"
-                      className="block px-3 py-2 text-base font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-md"
+                      className="block px-3 py-2 text-base font-medium bg-primary text-white hover:bg-primary/80 rounded-md"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Register

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useWebRTC } from "@/hooks/useWebRTC"
-import { VideoTile } from "./VideoTile"
+import VideoTile  from "./VideoTile"
 import { MeetingControls } from "./MeetingControls"
 import { ParticipantsPanel } from "./ParticipantsPanel"
 import { ChatPanel } from "./ChatPanel"

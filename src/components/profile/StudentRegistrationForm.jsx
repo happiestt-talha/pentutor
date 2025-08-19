@@ -101,7 +101,7 @@ export default function StudentRegistrationForm() {
   const [newLanguagePref, setNewLanguagePref] = useState("")
   const [newSocialLink, setNewSocialLink] = useState("")
 
-  const { user } = useAuth()
+  const { user, refetchUser } = useAuth()
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [dateOfBirth, setDateOfBirth] = useState(null)
@@ -630,6 +630,7 @@ export default function StudentRegistrationForm() {
 
       if (response.status === 201 || response.status === 200) {
         toast.success("Profile updated successfully!")
+        refetchUser()
       } else {
         toast.error("Unexpected response while updating profile.")
         console.error("Unexpected response", response)

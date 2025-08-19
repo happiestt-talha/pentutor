@@ -146,6 +146,11 @@ export default function MeetingRoomPage() {
       />
     )
   }
+  // if (isInMeeting && meeting) {
+  //   // TEMP debug: do not mount MeetingRoom yet
+  //   return <div data-debug="meeting-placeholder">Mounted — MeetingRoom would render here</div>
+  // }
+  
 
   // Join meeting prompts
   return (
@@ -235,3 +240,6 @@ export default function MeetingRoomPage() {
     </div>
   )
 }
+
+// inside MeetingRoomPage return temporarily:
+return <div>smoke test</div>

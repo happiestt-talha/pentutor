@@ -13,9 +13,10 @@ import Loader from "@/components/shared/Loader"
 import { useAuth } from "../auth/AuthContext"
 import axios from "axios"
 import { useRouter } from "next/navigation"
+import { Label } from "../ui/label"
 
 export default function TutorRegistrationForm() {
-  const { user } = useAuth()
+  const { user, refetchUser } = useAuth()
   const router = useRouter()
   const [formData, setFormData] = useState({
     // Base Information
@@ -307,7 +308,8 @@ export default function TutorRegistrationForm() {
         }))
 
         // Set dynamic arrays defensively
-        if (data.education && Array.isArray(data.education) && data.education.length > 0) setEducationEntries(data.education)
+        if (data.education && Array.isArray(data.education) && data.education.length > 0)
+          setEducationEntries(data.education)
         if (data.certifications && Array.isArray(data.certifications) && data.certifications.length > 0)
           setCertificationEntries(data.certifications)
         if (data.awards && Array.isArray(data.awards) && data.awards.length > 0) setAwardEntries(data.awards)
@@ -324,7 +326,6 @@ export default function TutorRegistrationForm() {
 
     //  user?.role === "teacher" && fetchProfile()
     fetchProfile()
-
   }, [user?.id])
 
   const validateCNIC = (cnic) => {
@@ -364,9 +365,12 @@ export default function TutorRegistrationForm() {
   const handleArrayFieldToggle = (fieldName, value) => {
     setFormData((prev) => ({
       ...prev,
-      [fieldName]: prev[fieldName] && Array.isArray(prev[fieldName]) ?
-        (prev[fieldName].includes(value) ? prev[fieldName].filter((item) => item !== value) : [...prev[fieldName], value])
-        : [value],
+      [fieldName]:
+        prev[fieldName] && Array.isArray(prev[fieldName])
+          ? prev[fieldName].includes(value)
+            ? prev[fieldName].filter((item) => item !== value)
+            : [...prev[fieldName], value]
+          : [value],
     }))
   }
 
@@ -407,18 +411,24 @@ export default function TutorRegistrationForm() {
   const handleSubjectToggle = (subjectId) => {
     setFormData((prev) => ({
       ...prev,
-      subjects: prev.subjects && Array.isArray(prev.subjects)
-        ? (prev.subjects.includes(subjectId) ? prev.subjects.filter((id) => id !== subjectId) : [...prev.subjects, subjectId])
-        : [subjectId],
+      subjects:
+        prev.subjects && Array.isArray(prev.subjects)
+          ? prev.subjects.includes(subjectId)
+            ? prev.subjects.filter((id) => id !== subjectId)
+            : [...prev.subjects, subjectId]
+          : [subjectId],
     }))
   }
 
   const handleQualificationToggle = (qualificationId) => {
     setFormData((prev) => ({
       ...prev,
-      qualifications: prev.qualifications && Array.isArray(prev.qualifications)
-        ? (prev.qualifications.includes(qualificationId) ? prev.qualifications.filter((id) => id !== qualificationId) : [...prev.qualifications, qualificationId])
-        : [qualificationId],
+      qualifications:
+        prev.qualifications && Array.isArray(prev.qualifications)
+          ? prev.qualifications.includes(qualificationId)
+            ? prev.qualifications.filter((id) => id !== qualificationId)
+            : [...prev.qualifications, qualificationId]
+          : [qualificationId],
     }))
   }
 
@@ -539,7 +549,6 @@ export default function TutorRegistrationForm() {
       }
     })
 
-
     // Ensure notification_preferences & social_links are JSON strings
     if (formData.notification_preferences && typeof formData.notification_preferences === "object") {
       data.set("notification_preferences", JSON.stringify(formData.notification_preferences))
@@ -561,12 +570,12 @@ export default function TutorRegistrationForm() {
       const token = localStorage.getItem("access_token")
       const response = await axios.post(`${API_BASE}/api/auth/teacher-profile/create/`, data, {
         headers: { Authorization: `Bearer ${token}` },
-        
       })
 
       if (response.status === 201 || response.status === 200) {
         toast.success("Profile updated successfully!")
-        router.push("/tutor/dashboard")
+        refetchUser()
+        router.push("/tutor/waiting-for-approval")
       } else {
         const errorData = response.data
         toast.error(`Failed to update profile: ${JSON.stringify(errorData)}`)
@@ -574,8 +583,7 @@ export default function TutorRegistrationForm() {
     } catch (error) {
       if (error.response && error.response.data) {
         console.error("Backend error:", error.response.data)
-        const errs = error.response.data.errors ?? error.response.data
-        toast.error(`Failed: ${typeof errs === "string" ? errs : JSON.stringify(errs)}`)
+        toast.error(`Failed: ${error.response.data.message}`)
       } else {
         console.error(error)
         toast.error("An error occurred while updating your profile.")
@@ -584,7 +592,6 @@ export default function TutorRegistrationForm() {
       setIsSubmitting(false)
     }
   }
-
 
   if (loading) {
     return <Loader text="Loading Profile..." />
@@ -604,60 +611,111 @@ export default function TutorRegistrationForm() {
               Personal Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                name="full_name"
-                value={formData.full_name}
-                onChange={handleInputChange}
-                placeholder="Full Name *"
-                required
-              />
-              <Input
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="Email Address"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="full_name">Full Name *</Label>
+                <Input
+                  id="full_name"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={handleInputChange}
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email address"
+                />
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Input name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Phone Number" />
-              <Input name="age" type="number" value={formData.age} onChange={handleInputChange} placeholder="Age" />
-              <Select onValueChange={(value) => handleSelectChange("gender", value)} value={formData.gender}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  {genderOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder="Enter phone number"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="age">Age</Label>
+                <Input
+                  id="age"
+                  name="age"
+                  type="number"
+                  value={formData.age}
+                  onChange={handleInputChange}
+                  placeholder="Enter your age"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gender</Label>
+                <Select onValueChange={(value) => handleSelectChange("gender", value)} value={formData.gender}>
+                  <SelectTrigger id="gender">
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {genderOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                name="date_of_birth"
-                type="date"
-                value={formData.date_of_birth}
+              <div className="space-y-2">
+                <Label htmlFor="date_of_birth">Date of Birth</Label>
+                <Input
+                  id="date_of_birth"
+                  name="date_of_birth"
+                  type="date"
+                  value={formData.date_of_birth}
+                  onChange={handleInputChange}
+                  placeholder="Select date of birth"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cnic">CNIC</Label>
+                <Input
+                  id="cnic"
+                  name="cnic"
+                  value={formData.cnic}
+                  onChange={handleInputChange}
+                  onBlur={handleCNICBlur}
+                  placeholder="xxxxx-xxxxxxx-x"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Full Address</Label>
+              <Textarea
+                id="address"
+                name="address"
+                value={formData.address}
                 onChange={handleInputChange}
-                placeholder="Date of Birth"
-              />
-              <Input
-                name="cnic"
-                value={formData.cnic}
-                onChange={handleInputChange}
-                onBlur={handleCNICBlur}
-                placeholder="CNIC (xxxxx-xxxxxxx-x)"
+                placeholder="Enter your complete address"
               />
             </div>
-            <Textarea name="address" value={formData.address} onChange={handleInputChange} placeholder="Full Address" />
-            <Textarea
-              name="bio"
-              value={formData.bio}
-              onChange={handleInputChange}
-              placeholder="A brief bio about yourself and your teaching philosophy"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                name="bio"
+                value={formData.bio}
+                onChange={handleInputChange}
+                placeholder="A brief bio about yourself and your teaching philosophy"
+              />
+            </div>
           </div>
 
           {/* Location Information */}
@@ -667,17 +725,48 @@ export default function TutorRegistrationForm() {
               Location & Contact
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input name="country" value={formData.country} onChange={handleInputChange} placeholder="Country" />
-              <Input name="city" value={formData.city} onChange={handleInputChange} placeholder="City" />
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  placeholder="Enter your country"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  placeholder="Enter your city"
+                />
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input name="area" value={formData.area} onChange={handleInputChange} placeholder="Area/District" />
-              <Input
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                placeholder="Specific Location"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="area">Area/District</Label>
+                <Input
+                  id="area"
+                  name="area"
+                  value={formData.area}
+                  onChange={handleInputChange}
+                  placeholder="Enter area or district"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="location">Specific Location</Label>
+                <Input
+                  id="location"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  placeholder="Enter specific location"
+                />
+              </div>
             </div>
           </div>
 
@@ -687,71 +776,95 @@ export default function TutorRegistrationForm() {
               <Briefcase />
               Professional Information
             </h3>
-            <Input
-              name="headline"
-              value={formData.headline}
-              onChange={handleInputChange}
-              placeholder="Professional Headline (e.g., 'Experienced Math Tutor')"
-            />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Select
-                onValueChange={(value) => handleSelectChange("expertise_level", value)}
-                value={formData.expertise_level}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Expertise Level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {expertiseLevelOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-2">
+              <Label htmlFor="headline">Professional Headline</Label>
               <Input
-                name="years_of_experience"
-                type="number"
-                value={formData.years_of_experience}
+                id="headline"
+                name="headline"
+                value={formData.headline}
                 onChange={handleInputChange}
-                placeholder="Years of Experience"
+                placeholder="e.g., 'Experienced Math Tutor'"
               />
-              <Select
-                onValueChange={(value) => handleSelectChange("employment_type", value)}
-                value={formData.employment_type}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Employment Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {employmentTypeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="expertise_level">Expertise Level</Label>
+                <Select
+                  onValueChange={(value) => handleSelectChange("expertise_level", value)}
+                  value={formData.expertise_level}
+                >
+                  <SelectTrigger id="expertise_level">
+                    <SelectValue placeholder="Select expertise level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {expertiseLevelOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="years_of_experience">Years of Experience</Label>
+                <Input
+                  id="years_of_experience"
+                  name="years_of_experience"
+                  type="number"
+                  value={formData.years_of_experience}
+                  onChange={handleInputChange}
+                  placeholder="Enter years of experience"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="employment_type">Employment Type</Label>
+                <Select
+                  onValueChange={(value) => handleSelectChange("employment_type", value)}
+                  value={formData.employment_type}
+                >
+                  <SelectTrigger id="employment_type">
+                    <SelectValue placeholder="Select employment type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employmentTypeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                name="department"
-                value={formData.department}
-                onChange={handleInputChange}
-                placeholder="Department/Field"
-              />
-              <Input
-                name="hourly_rate"
-                type="number"
-                step="0.01"
-                value={formData.hourly_rate}
-                onChange={handleInputChange}
-                placeholder="Hourly Rate (USD)"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="department">Department/Field</Label>
+                <Input
+                  id="department"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleInputChange}
+                  placeholder="Enter your department or field"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hourly_rate">Hourly Rate (USD)</Label>
+                <Input
+                  id="hourly_rate"
+                  name="hourly_rate"
+                  type="number"
+                  step="0.01"
+                  value={formData.hourly_rate}
+                  onChange={handleInputChange}
+                  placeholder="Enter hourly rate"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Expertise Areas</label>
+              <Label htmlFor="expertise_areas">Expertise Areas</Label>
               <Input
+                id="expertise_areas"
                 placeholder="Enter expertise areas separated by commas (e.g., Mathematics, Physics, Chemistry)"
                 value={formData.expertise_areas.join(", ")}
                 onChange={(e) => {
@@ -766,18 +879,26 @@ export default function TutorRegistrationForm() {
 
             {/* Legacy fields for backward compatibility */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                name="organization_name"
-                value={formData.organization_name}
-                onChange={handleInputChange}
-                placeholder="Current Organization"
-              />
-              <Input
-                name="designation"
-                value={formData.designation}
-                onChange={handleInputChange}
-                placeholder="Current Designation"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="organization_name">Current Organization</Label>
+                <Input
+                  id="organization_name"
+                  name="organization_name"
+                  value={formData.organization_name}
+                  onChange={handleInputChange}
+                  placeholder="Enter current organization"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="designation">Current Designation</Label>
+                <Input
+                  id="designation"
+                  name="designation"
+                  value={formData.designation}
+                  onChange={handleInputChange}
+                  placeholder="Enter current designation"
+                />
+              </div>
             </div>
           </div>
 
@@ -802,35 +923,74 @@ export default function TutorRegistrationForm() {
                   )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <Input
-                    placeholder="Institution"
-                    value={entry.institution || ""}
-                    onChange={(e) =>
-                      handleDynamicArrayChange("education", educationEntries, setEducationEntries, index, "institution", e.target.value)
-                    }
-                  />
-                  <Input
-                    placeholder="Degree"
-                    value={entry.degree || ""}
-                    onChange={(e) =>
-                      handleDynamicArrayChange("education", educationEntries, setEducationEntries, index, "degree", e.target.value)
-                    }
-                  />
-                  <Input
-                    placeholder="Year"
-                    type="number"
-                    value={entry.year || ""}
-                    onChange={(e) =>
-                      handleDynamicArrayChange("education", educationEntries, setEducationEntries, index, "year", e.target.value)
-                    }
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor={`institution-${index}`}>Institution</Label>
+                    <Input
+                      id={`institution-${index}`}
+                      placeholder="Enter institution name"
+                      value={entry.institution || ""}
+                      onChange={(e) =>
+                        handleDynamicArrayChange(
+                          "education",
+                          educationEntries,
+                          setEducationEntries,
+                          index,
+                          "institution",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`degree-${index}`}>Degree</Label>
+                    <Input
+                      id={`degree-${index}`}
+                      placeholder="Enter degree"
+                      value={entry.degree || ""}
+                      onChange={(e) =>
+                        handleDynamicArrayChange(
+                          "education",
+                          educationEntries,
+                          setEducationEntries,
+                          index,
+                          "degree",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`year-${index}`}>Year</Label>
+                    <Input
+                      id={`year-${index}`}
+                      placeholder="Enter year"
+                      type="number"
+                      value={entry.year || ""}
+                      onChange={(e) =>
+                        handleDynamicArrayChange(
+                          "education",
+                          educationEntries,
+                          setEducationEntries,
+                          index,
+                          "year",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             ))}
             <Button
               type="button"
               variant="outline"
-              onClick={() => addDynamicEntry("education", educationEntries, setEducationEntries, { institution: "", degree: "", year: "" })}
+              onClick={() =>
+                addDynamicEntry("education", educationEntries, setEducationEntries, {
+                  institution: "",
+                  degree: "",
+                  year: "",
+                })
+              }
             >
               Add Education
             </Button>
@@ -850,35 +1010,61 @@ export default function TutorRegistrationForm() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => removeDynamicEntry("certifications", certificationEntries, setCertificationEntries, index)}
+                      onClick={() =>
+                        removeDynamicEntry("certifications", certificationEntries, setCertificationEntries, index)
+                      }
                     >
                       Remove
                     </Button>
                   )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <Input
-                    placeholder="Certification Name"
-                    value={entry.name || ""}
-                    onChange={(e) =>
-                      handleDynamicArrayChange("certifications", certificationEntries, setCertificationEntries, index, "name", e.target.value)
-                    }
-                  />
-                  <Input
-                    placeholder="Year"
-                    type="number"
-                    value={entry.year || ""}
-                    onChange={(e) =>
-                      handleDynamicArrayChange("certifications", certificationEntries, setCertificationEntries, index, "year", e.target.value)
-                    }
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor={`cert-name-${index}`}>Certification Name</Label>
+                    <Input
+                      id={`cert-name-${index}`}
+                      placeholder="Enter certification name"
+                      value={entry.name || ""}
+                      onChange={(e) =>
+                        handleDynamicArrayChange(
+                          "certifications",
+                          certificationEntries,
+                          setCertificationEntries,
+                          index,
+                          "name",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`cert-year-${index}`}>Year</Label>
+                    <Input
+                      id={`cert-year-${index}`}
+                      placeholder="Enter year"
+                      type="number"
+                      value={entry.year || ""}
+                      onChange={(e) =>
+                        handleDynamicArrayChange(
+                          "certifications",
+                          certificationEntries,
+                          setCertificationEntries,
+                          index,
+                          "year",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             ))}
             <Button
               type="button"
               variant="outline"
-              onClick={() => addDynamicEntry("certifications", certificationEntries, setCertificationEntries, { name: "", year: "" })}
+              onClick={() =>
+                addDynamicEntry("certifications", certificationEntries, setCertificationEntries, { name: "", year: "" })
+              }
             >
               Add Certification
             </Button>
@@ -889,12 +1075,16 @@ export default function TutorRegistrationForm() {
               <GraduationCap />
               Teaching & Course Information
             </h3>
-            <Textarea
-              name="teaching_style"
-              value={formData.teaching_style}
-              onChange={handleInputChange}
-              placeholder="Describe your teaching style and methodology"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="teaching_style">Teaching Style</Label>
+              <Textarea
+                id="teaching_style"
+                name="teaching_style"
+                value={formData.teaching_style}
+                onChange={handleInputChange}
+                placeholder="Describe your teaching style and methodology"
+              />
+            </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Languages Spoken</label>
@@ -957,64 +1147,92 @@ export default function TutorRegistrationForm() {
               Professional Links
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                name="linkedin_profile"
-                value={formData.linkedin_profile}
-                onChange={handleInputChange}
-                placeholder="LinkedIn Profile URL"
-              />
-              <Input
-                name="github_profile"
-                value={formData.github_profile}
-                onChange={handleInputChange}
-                placeholder="GitHub Profile URL"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="linkedin_profile">LinkedIn Profile</Label>
+                <Input
+                  id="linkedin_profile"
+                  name="linkedin_profile"
+                  value={formData.linkedin_profile}
+                  onChange={handleInputChange}
+                  placeholder="LinkedIn Profile URL"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="github_profile">GitHub Profile</Label>
+                <Input
+                  id="github_profile"
+                  name="github_profile"
+                  value={formData.github_profile}
+                  onChange={handleInputChange}
+                  placeholder="GitHub Profile URL"
+                />
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                name="personal_website"
-                value={formData.personal_website}
-                onChange={handleInputChange}
-                placeholder="Personal Website URL"
-              />
-              <Input
-                name="youtube_channel"
-                value={formData.youtube_channel}
-                onChange={handleInputChange}
-                placeholder="YouTube Channel URL"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="personal_website">Personal Website</Label>
+                <Input
+                  id="personal_website"
+                  name="personal_website"
+                  value={formData.personal_website}
+                  onChange={handleInputChange}
+                  placeholder="Personal Website URL"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="youtube_channel">YouTube Channel</Label>
+                <Input
+                  id="youtube_channel"
+                  name="youtube_channel"
+                  value={formData.youtube_channel}
+                  onChange={handleInputChange}
+                  placeholder="YouTube Channel URL"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Social Media Links</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Input
-                  placeholder="Twitter URL"
-                  value={socialLinksEntries.twitter || ""}
-                  onChange={(e) => {
-                    const newSocialLinks = { ...socialLinksEntries, twitter: e.target.value }
-                    setSocialLinksEntries(newSocialLinks)
-                    setFormData((prev) => ({ ...prev, social_links: newSocialLinks }))
-                  }}
-                />
-                <Input
-                  placeholder="Facebook URL"
-                  value={socialLinksEntries.facebook || ""}
-                  onChange={(e) => {
-                    const newSocialLinks = { ...socialLinksEntries, facebook: e.target.value }
-                    setSocialLinksEntries(newSocialLinks)
-                    setFormData((prev) => ({ ...prev, social_links: newSocialLinks }))
-                  }}
-                />
-                <Input
-                  placeholder="Instagram URL"
-                  value={socialLinksEntries.instagram || ""}
-                  onChange={(e) => {
-                    const newSocialLinks = { ...socialLinksEntries, instagram: e.target.value }
-                    setSocialLinksEntries(newSocialLinks)
-                    setFormData((prev) => ({ ...prev, social_links: newSocialLinks }))
-                  }}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="twitter">Twitter URL</Label>
+                  <Input
+                    id="twitter"
+                    placeholder="Twitter URL"
+                    value={socialLinksEntries.twitter || ""}
+                    onChange={(e) => {
+                      const newSocialLinks = { ...socialLinksEntries, twitter: e.target.value }
+                      setSocialLinksEntries(newSocialLinks)
+                      setFormData((prev) => ({ ...prev, social_links: newSocialLinks }))
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="facebook">Facebook URL</Label>
+                  <Input
+                    id="facebook"
+                    placeholder="Facebook URL"
+                    value={socialLinksEntries.facebook || ""}
+                    onChange={(e) => {
+                      const newSocialLinks = { ...socialLinksEntries, facebook: e.target.value }
+                      setSocialLinksEntries(newSocialLinks)
+                      setFormData((prev) => ({ ...prev, social_links: newSocialLinks }))
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="instagram">Instagram URL</Label>
+                  <Input
+                    id="instagram"
+                    placeholder="Instagram URL"
+                    value={socialLinksEntries.instagram || ""}
+                    onChange={(e) => {
+                      const newSocialLinks = { ...socialLinksEntries, instagram: e.target.value }
+                      setSocialLinksEntries(newSocialLinks)
+                      setFormData((prev) => ({ ...prev, social_links: newSocialLinks }))
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -1027,9 +1245,12 @@ export default function TutorRegistrationForm() {
             <div className="space-y-3">
               {daysOfWeek.map((day) => (
                 <div key={day} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
-                  <label className="text-sm font-medium">{day}</label>
+                  <Label htmlFor={`schedule-${day}`} className="text-sm font-medium">
+                    {day}
+                  </Label>
                   <div className="md:col-span-3">
                     <Input
+                      id={`schedule-${day}`}
                       placeholder="Time slots (e.g., 9:00-12:00, 14:00-16:00)"
                       value={formData.availability_schedule[day]?.join(", ") || ""}
                       onChange={(e) => handleScheduleChange(day, e.target.value)}
@@ -1092,7 +1313,9 @@ export default function TutorRegistrationForm() {
                   className="hidden"
                 />
                 <label htmlFor="degree_certificates" className="cursor-pointer">
-                  <p className="text-gray-500">{fileNames.degree_certificates || "Click to upload degree certificates"}</p>
+                  <p className="text-gray-500">
+                    {fileNames.degree_certificates || "Click to upload degree certificates"}
+                  </p>
                 </label>
               </div>
             </div>
@@ -1205,25 +1428,37 @@ export default function TutorRegistrationForm() {
               Legacy Academic & Teaching
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                name="minimum_qualification_required"
-                value={formData.minimum_qualification_required}
+              <div className="space-y-2">
+                <Label htmlFor="minimum_qualification_required">Minimum Qualification Required</Label>
+                <Input
+                  id="minimum_qualification_required"
+                  name="minimum_qualification_required"
+                  value={formData.minimum_qualification_required}
+                  onChange={handleInputChange}
+                  placeholder="Enter minimum qualification required"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="experience_required">Experience Required</Label>
+                <Input
+                  id="experience_required"
+                  name="experience_required"
+                  value={formData.experience_required}
+                  onChange={handleInputChange}
+                  placeholder="Enter experience required"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="areas_to_teach">Areas to Teach</Label>
+              <Textarea
+                id="areas_to_teach"
+                name="areas_to_teach"
+                value={formData.areas_to_teach}
                 onChange={handleInputChange}
-                placeholder="Minimum Qualification Required"
-              />
-              <Input
-                name="experience_required"
-                value={formData.experience_required}
-                onChange={handleInputChange}
-                placeholder="Experience Required"
+                placeholder="Detailed description of areas you can teach"
               />
             </div>
-            <Textarea
-              name="areas_to_teach"
-              value={formData.areas_to_teach}
-              onChange={handleInputChange}
-              placeholder="Detailed description of areas you can teach"
-            />
 
             {/* Subjects Selection */}
             <div className="space-y-2">

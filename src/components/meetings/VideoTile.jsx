@@ -1,33 +1,50 @@
+// src/components/meetings/VideoTile.jsx
 "use client"
 
-import { useEffect, useRef } from "react"
+import React, { useEffect, useRef } from "react"
 import { Mic, MicOff, Video, VideoOff, Monitor } from "lucide-react"
 
-export function VideoTile({
+export default function VideoTile({
   stream,
-  participantName,
+  participantName = "",
   isMuted = false,
   isVideoOff = false,
   isScreenSharing = false,
   isLocal = false,
   className = "",
+  videoRef, // explicit optional ref prop (use this instead of passing `ref`)
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const internalRef = useRef(null)
+
+  // Resolve which ref to use for the actual <video /> element.
+  // If caller passed a non-ref (string/boolean/etc.), we ignore it and use internalRef.
+  const resolvedRef = (videoRef && typeof videoRef === "object") ? videoRef : internalRef
 
   useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream
+    const target = resolvedRef && resolvedRef.current
+    if (target && stream) {
+      try {
+        // Prefer srcObject for MediaStream
+        target.srcObject = stream
+      } catch (e) {
+        // Some environments/browsers may throw — log and ignore
+        // This prevents the whole app from crashing on odd stream objects
+        // eslint-disable-next-line no-console
+        console.warn("VideoTile: could not set srcObject on video element", e)
+      }
     }
-  }, [stream])
+  }, [stream, resolvedRef])
+
+  const avatarLetter = (participantName || "?").charAt(0).toUpperCase()
 
   return (
     <div className={`relative bg-gray-900 rounded-lg overflow-hidden ${className}`}>
       {/* Video Element */}
       <video
-        ref={videoRef}
+        ref={resolvedRef}
         autoPlay
         playsInline
-        muted={isLocal} // Mute local video to prevent feedback
+        muted={isLocal} // mute local video to avoid feedback
         className={`w-full h-full object-cover ${isVideoOff ? "hidden" : ""}`}
       />
 
@@ -35,7 +52,7 @@ export function VideoTile({
       {isVideoOff && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#313D6A]">
           <div className="w-16 h-16 bg-[#F5BB07] rounded-full flex items-center justify-center text-[#313D6A] font-bold text-xl">
-            {participantName.charAt(0).toUpperCase()}
+            {avatarLetter}
           </div>
         </div>
       )}
