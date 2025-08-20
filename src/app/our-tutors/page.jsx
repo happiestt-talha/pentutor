@@ -1,29 +1,33 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Filter, Star, Users, Clock } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sidebar } from "@/components/ui/sidebar"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import axios from "axios"
+
+import TeacherImage from "@/assets/images/our-tutors/teacher.webp"
+import MaleTeacher from "@/assets/images/our-tutors/male-teacher.webp"
+import Image from "next/image"
 
 export default function OurTutorPage() {
   const router = useRouter()
   const [teachers, setTeachers] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [filterCategory, setFilterCategory] = useState("all")
+  const [gradeFilter, setGradeFilter] = useState("")
+  const [cityFilter, setCityFilter] = useState("")
   const [isAdmin, setIsAdmin] = useState(false)
+  const [currentPage, setCurrentPage] = useState(0)
+  const tutorsPerPage = 6
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
 
-  // Check user role from localStorage
   useEffect(() => {
     const user = localStorage.getItem("user")
     if (user) {
@@ -61,17 +65,15 @@ export default function OurTutorPage() {
 
   const filteredTeachers = teachers.filter((teacher) => {
     const matchesSearch =
+      searchQuery === "" ||
       teacher.expertise_areas.some((area) => area.toLowerCase().includes(searchQuery.toLowerCase())) ||
       teacher.course_categories.some((category) => category.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (isAdmin &&
         (teacher.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           teacher.last_name.toLowerCase().includes(searchQuery.toLowerCase())))
 
-    const matchesCategory =
-      filterCategory === "all" ||
-      teacher.course_categories.some((category) => category.toLowerCase() === filterCategory.toLowerCase())
-
-    return matchesSearch && matchesCategory
+    // For now, we'll keep the existing filtering logic since grade and city aren't in the API response
+    return matchesSearch
   })
 
   const handleTutorClick = (tutorId) => {
@@ -85,203 +87,279 @@ export default function OurTutorPage() {
     return `Teacher #${teacher.id}`
   }
 
-  const getAvailableDays = (schedule) => {
-    return Object.keys(schedule).length
+  const totalPages = Math.ceil(filteredTeachers.length / tutorsPerPage)
+  const currentTutors = filteredTeachers.slice(currentPage * tutorsPerPage, (currentPage + 1) * tutorsPerPage)
+
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => Math.max(0, prev - 1))
+  }
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
+  }
+
+  const handleSearch = () => {
+    setCurrentPage(0) // Reset to first page when searching
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar />
+    <div className="min-h-screen" style={{ backgroundColor: "#FFFCE0" }}>
+      <div className="relative">
+        <div className="relative min-h-[600px] overflow-hidden">
+          {/* Background decorative elements */}
+          <div className="absolute top-0 left-0 w-64 h-64 bg-[#F5BB07] rounded-full opacity-20 -translate-x-32 -translate-y-32"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#F5BB07] rounded-full opacity-20 translate-x-32 -translate-y-32"></div>
 
-      <div className="lg:ml-64">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-[#313D6A]">Our Tutors</h1>
-              <p className="text-gray-600 mt-1">{filteredTeachers.length} expert tutors available</p>
+          {/* Hero Content Container */}
+          <section className="relative z-10 container mx-auto pt-8 lg:pt-12 pb-8">
+            {/* Top area with heading and side images */}
+            <div className="relative">
+              <div className="grid grid-cols-1 lg:grid-cols-3 items-center gap-6 min-h-[360px] lg:min-h-[420px]">
+                {/* LEFT IMAGE - hidden on small screens so it doesn't occupy space */}
+                <div className="hidden md:flex justify-center lg:justify-start">
+                  <div
+                    className="relative md:w-64 md:h-80 lg:w-72 lg:h-[420px] rounded-lg overflow-hidden transform md:translate-y-6 lg:translate-y-12"
+                    aria-hidden="true"
+                  >
+                    <Image
+                      src={TeacherImage}
+                      alt="Female Tutor"
+                      fill
+                      className="object-cover object-top"
+                      priority
+                      quality={90}
+                      sizes="(max-width: 768px) 256px, 320px"
+                    />
+                  </div>
+                </div>
+
+                {/* CENTER HEADING */}
+                <div className="flex justify-center text-center px-4">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#313D6A] leading-tight md:whitespace-nowrap">
+                    Certified Tutors
+                  </h1>
+                </div>
+
+                {/* RIGHT IMAGE - hidden on small screens */}
+                <div className="hidden md:flex justify-center lg:justify-end">
+                  <div
+                    className="relative md:w-64 md:h-80 lg:w-72 lg:h-[420px] rounded-lg overflow-hidden transform md:translate-y-6 lg:translate-y-12"
+                    aria-hidden="true"
+                  >
+                    <Image
+                      src={MaleTeacher}
+                      alt="Male Tutor"
+                      fill
+                      className="object-cover object-top"
+                      priority
+                      quality={90}
+                      sizes="(max-width: 768px) 256px, 320px"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* SEARCH BLOCK - pulled up to overlap images; button sits absolutely on top of pill */}
+            <div className="relative z-20 -mt-8 md:-mt-14">
+              <div className="max-w-5xl mx-auto relative px-4">
+                {/* floating button centered; smaller offset on mobile */}
+                <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 md:-top-12 z-30">
+                  <button className="bg-black text-[#F5BB07] px-6 md:px-8 py-2 md:py-3 rounded-t-lg font-bold">
+                    Search Tutor
+                  </button>
+                </div>
+
+                {/* the yellow pill — pt ensures inputs clear the floating button */}
+                <div className="bg-[#F5BB07] rounded-lg md:rounded-full p-4 md:p-6 shadow-xl">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <input
+                      placeholder="Enter Any Subject"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full md:flex-1 bg-white border-0 rounded-lg h-14 text-gray-700 placeholder:text-gray-500 text-center md:text-left font-medium px-4"
+                      aria-label="Subject"
+                    />
+                    <input
+                      placeholder="Enter Any Grade To Search"
+                      value={gradeFilter}
+                      onChange={(e) => setGradeFilter(e.target.value)}
+                      className="w-full md:flex-1 bg-white border-0 rounded-lg h-14 text-gray-700 placeholder:text-gray-500 text-center md:text-left font-medium px-4"
+                      aria-label="Grade"
+                    />
+                    <input
+                      placeholder="Enter City / Area To Search"
+                      value={cityFilter}
+                      onChange={(e) => setCityFilter(e.target.value)}
+                      className="w-full md:flex-1 bg-white border-0 rounded-lg h-14 text-gray-700 placeholder:text-gray-500 text-center md:text-left font-medium px-4"
+                      aria-label="City or area"
+                    />
+                  </div>
+                </div>
+
+                {/* main Search button under the pill */}
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={handleSearch}
+                    className="bg-black hover:bg-gray-800 text-[#F5BB07] px-12 md:px-16 py-2 md:py-3 rounded-full text-lg md:text-xl font-bold shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div className="bg-[#313D6A] py-4 text-center">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-center items-center">
+            <h2 className="text-2xl md:text-2xl lg:text-4xl font-bold text-white">REGISTERED TUTORS</h2>
           </div>
         </div>
+      </div>
 
-        {/* Search and Filters */}
-        <div className="px-6 py-4 bg-white border-b border-gray-200">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search by expertise, subjects, or categories..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {/* Category Filter */}
-            <div className="flex gap-4">
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="data science">Data Science</SelectItem>
-                  <SelectItem value="web development">Web Development</SelectItem>
-                  <SelectItem value="mathematics">Mathematics</SelectItem>
-                  <SelectItem value="physics">Physics</SelectItem>
-                  <SelectItem value="chemistry">Chemistry</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Card key={index} className="animate-pulse bg-white">
+                <CardContent className="p-6">
+                  <div className="flex justify-center mb-4">
+                    <div className="h-20 w-20 bg-gray-200 rounded-full"></div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                    <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </div>
-
-        {/* Tutors Grid */}
-        <div className="p-6">
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {Array.from({ length: 8 }).map((_, index) => (
-                <Card key={index} className="animate-pulse">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4 mb-4">
-                      <div className="h-16 w-16 bg-gray-200 rounded-full"></div>
-                      <div className="flex-1">
-                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded"></div>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 rounded"></div>
-                      <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : filteredTeachers.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-lg mb-2">No tutors found</div>
-              <p className="text-gray-600">Try adjusting your search or filters</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredTeachers.map((teacher) => (
+        ) : filteredTeachers.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-[#313D6A] text-lg mb-2">No tutors found</div>
+            <p className="text-gray-600">Try adjusting your search criteria</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {currentTutors.map((teacher) => (
                 <Card
                   key={teacher.id}
-                  className="cursor-pointer hover:shadow-lg transition-all duration-200 group border-gray-200 hover:border-[#F5BB07]"
+                  className="bg-white shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer border-2 border-gray-100 hover:border-[#F5BB07]"
                   onClick={() => handleTutorClick(teacher.id)}
                 >
-                  <CardContent className="p-6">
-                    {/* Profile Section */}
-                    <div className="flex items-center space-x-4 mb-4">
-                      <Avatar className="h-16 w-16">
+                  <CardContent className="p-6 text-center">
+                    {/* Profile Picture */}
+                    <div className="flex justify-center mb-4">
+                      <Avatar className="h-20 w-20 border-4 border-gray-200">
                         <AvatarImage
                           src={teacher.profile_picture || "/placeholder.svg"}
                           alt={getDisplayName(teacher)}
                         />
-                        <AvatarFallback className="bg-[#313D6A] text-white text-lg">
+                        <AvatarFallback className="bg-[#313D6A] text-white text-xl">
                           {isAdmin ? `${teacher.first_name[0]}${teacher.last_name[0]}` : `T${teacher.id}`}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-[#313D6A] group-hover:text-[#F5BB07] transition-colors truncate">
-                          {getDisplayName(teacher)}
-                        </h3>
-                        {isAdmin && <p className="text-sm text-gray-600 truncate">@{teacher.username}</p>}
-                        <div className="flex items-center mt-1">
-                          <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                          <span className="text-sm text-gray-600">4.8</span>
-                        </div>
-                      </div>
                     </div>
 
-                    {/* Bio */}
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                      {teacher.bio ||
-                        "Experienced educator passionate about teaching and helping students achieve their goals."}
-                    </p>
-
-                    {/* Expertise Areas */}
+                    {/* ID Badge */}
                     <div className="mb-4">
-                      <h4 className="text-sm font-medium text-[#313D6A] mb-2">Expertise</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {teacher.expertise_areas.slice(0, 3).map((area, index) => (
-                          <Badge key={index} variant="secondary" className="bg-[#313D6A]/10 text-[#313D6A] text-xs">
-                            {area}
-                          </Badge>
-                        ))}
-                        {teacher.expertise_areas.length > 3 && (
-                          <Badge variant="secondary" className="bg-gray-100 text-gray-600 text-xs">
-                            +{teacher.expertise_areas.length - 3}
-                          </Badge>
-                        )}
+                      <Badge className="bg-[#F5BB07] text-black font-bold px-3 py-1">
+                        ID: PT{teacher.id.toString().padStart(3, "0")}
+                      </Badge>
+                    </div>
+
+                    {/* Teacher Details */}
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#313D6A]">Qualification:</span>
+                        <span className="text-gray-700">{teacher?.education[0]?.degree}</span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#313D6A]">Experience:</span>
+                        <span className="text-gray-700">5+ Years</span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#313D6A]">Areas To Teach:</span>
+                        <span className="text-gray-700">
+                          {teacher.expertise_areas.slice(0, 1).join(", ") || "Multiple"}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#313D6A]">Experience:</span>
+                        <span className="text-gray-700">5+ Years</span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#313D6A]">Course Category:</span>
+                        <span className="text-gray-700">{teacher?.course_categories[0] || "Multiple"}</span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#313D6A]">Teaching Method:</span>
+                        <span className="text-gray-700">{teacher?.preferred_teaching_methods[0] || "Multiple"}</span>
                       </div>
                     </div>
 
-                    {/* Course Categories */}
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-[#313D6A] mb-2">Categories</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {teacher.course_categories.slice(0, 2).map((category, index) => (
-                          <Badge key={index} className="bg-[#F5BB07]/20 text-[#313D6A] text-xs">
-                            {category}
-                          </Badge>
-                        ))}
-                        {teacher.course_categories.length > 2 && (
-                          <Badge variant="secondary" className="bg-gray-100 text-gray-600 text-xs">
-                            +{teacher.course_categories.length - 2}
-                          </Badge>
-                        )}
-                      </div>
+                    {/* Action Buttons */}
+                    <div className="flex justify-center gap-2 mt-6">
+                      <Button
+                        className="flex-1 bg-[#F5BB07] hover:bg-[#F5BB07]/90 text-black font-medium"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleTutorClick(teacher.id)
+                        }}
+                      >
+                        View Full Profile
+                      </Button>
+                      <Button
+                        className="flex-1 bg-[#313D6A] hover:bg-[#313D6A]/90 text-white font-medium"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          // Handle trial class booking
+                          toast.success("Trial class booking feature coming soon!")
+                        }}
+                      >
+                        Take Trial Class
+                      </Button>
                     </div>
-
-                    {/* Stats */}
-                    <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                      <div className="flex items-center">
-                        <Users className="h-4 w-4 mr-1" />
-                        <span>150+ students</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span>{getAvailableDays(teacher.availability_schedule)} days</span>
-                      </div>
-                    </div>
-
-                    {/* Languages */}
-                    <div className="mb-4">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <span className="font-medium mr-2">Languages:</span>
-                        <span>{teacher.languages_spoken.join(", ")}</span>
-                      </div>
-                    </div>
-
-                    {/* Teaching Methods */}
-                    <div className="flex flex-wrap gap-1">
-                      {teacher.preferred_teaching_methods.map((method, index) => (
-                        <Badge key={index} variant="outline" className="border-[#313D6A]/30 text-[#313D6A] text-xs">
-                          {method}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    {/* View Profile Button */}
-                    <Button
-                      className="w-full mt-4 bg-[#313D6A] hover:bg-[#313D6A]/90 text-white"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleTutorClick(teacher.id)
-                      }}
-                    >
-                      View Profile
-                    </Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          )}
-        </div>
+
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4">
+                <Button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 0}
+                  className="bg-[#F5BB07] hover:bg-[#F5BB07]/90 text-black p-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </Button>
+
+                <span className="text-[#313D6A] font-medium">
+                  Page {currentPage + 1} of {totalPages}
+                </span>
+
+                <Button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages - 1}
+                  className="bg-[#F5BB07] hover:bg-[#F5BB07]/90 text-black p-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )

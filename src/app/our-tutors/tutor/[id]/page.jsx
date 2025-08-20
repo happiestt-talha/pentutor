@@ -2,21 +2,30 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, Star, Users, Clock, Calendar, Mail, Globe, Award, CheckCircle } from "lucide-react"
+import {
+  ArrowLeft,
+  Star,
+  Users,
+  Clock,
+  Globe,
+  Award,
+  CheckCircle,
+  Play,
+  Facebook,
+  Instagram,
+  Youtube,
+  Twitter,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Sidebar } from "@/components/ui/sidebar"
 import { toast } from "sonner"
 import axios from "axios"
 
 export default function TutorDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const tutorId = params.id 
-  console.log("tutorId", tutorId)
+  const tutorId = params.id
   const [tutor, setTutor] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -40,8 +49,6 @@ export default function TutorDetailPage() {
     try {
       setLoading(true)
       const response = await axios.get(`${API_URL}/api/courses/teachers/${tutorId}`)
-      console.log("response", response)
-
       if (response.status === 200) {
         setTutor(response.data)
       } else {
@@ -57,40 +64,32 @@ export default function TutorDetailPage() {
   }
 
   useEffect(() => {
-    if (tutorId) {
-      fetchTutorDetail()
-    }
+    if (tutorId) fetchTutorDetail()
   }, [tutorId])
 
   const getDisplayName = (teacher) => {
-    if (isAdmin) {
-      return `${teacher.first_name} ${teacher.last_name}`
-    }
+    if (!teacher) return "Teacher"
+    if (isAdmin) return `${teacher.first_name} ${teacher.last_name}`
     return `Teacher #${teacher.id}`
   }
 
   const getAvailabilityDays = (schedule) => {
+    if (!schedule || typeof schedule !== "object") return []
     return Object.entries(schedule).map(([day, time]) => ({
       day: day.charAt(0).toUpperCase() + day.slice(1),
-      time,
+      time: Array.isArray(time) ? time.join(", ") : time,
     }))
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Sidebar />
-        <div className="lg:ml-64 p-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded mb-4 w-1/3"></div>
-            <div className="h-64 bg-gray-200 rounded mb-6"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <div className="h-32 bg-gray-200 rounded mb-4"></div>
-                <div className="h-48 bg-gray-200 rounded"></div>
-              </div>
-              <div className="h-96 bg-gray-200 rounded"></div>
-            </div>
+      <div className="min-h-screen bg-[#FFFCE0]">
+        <div className="animate-pulse p-6">
+          <div className="h-8 bg-gray-200 rounded mb-4 w-1/3"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="h-96 bg-gray-200 rounded lg:col-span-3"></div>
+            <div className="h-96 bg-gray-200 rounded lg:col-span-6"></div>
+            <div className="h-96 bg-gray-200 rounded lg:col-span-3"></div>
           </div>
         </div>
       </div>
@@ -99,337 +98,330 @@ export default function TutorDetailPage() {
 
   if (!tutor) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Sidebar />
-        <div className="lg:ml-64 p-6">
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Tutor not found</h2>
-            <p className="text-gray-600 mb-4">The tutor you're looking for doesn't exist.</p>
-            <Button onClick={() => router.push("/our-tutor")}>Back to Tutors</Button>
-          </div>
+      <div className="min-h-screen bg-[#FFFCE0] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-[#313D6A] mb-2">Tutor not found</h2>
+          <p className="text-gray-600 mb-4">The tutor you're looking for doesn't exist.</p>
+          <Button
+            onClick={() => router.push("/our-tutor")}
+            className="bg-[#F5BB07] hover:bg-[#F5BB07]/90 text-[#313D6A]"
+          >
+            Back to Tutors
+          </Button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar />
-
-      <div className="lg:ml-64 px-6">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <Button variant="ghost" onClick={() => router.back()} className="mb-4 text-[#313D6A] hover:text-[#F5BB07]">
+    <div className="min-h-screen pb-6 bg-white">
+      {/* Top area */}
+      <div className="w-full bg-white">
+        <div className="grid grid-cols-12 gap-6 max-w-[1200px] mx-auto px-4">
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="mb-6 text-[#313D6A] hover:text-[#F5BB07] hover:bg-[#313D6A]/5"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Tutors
           </Button>
         </div>
+      </div>
 
-        {/* Tutor Hero Section */}
-        <div className="bg-gradient-to-r rounded-lg from-[#313D6A] to-[#313D6A]/80 text-white px-6 py-12">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-              <div className="lg:col-span-2">
-                <div className="flex items-center space-x-6 mb-6">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={tutor.profile_picture || "/placeholder.svg"} alt={getDisplayName(tutor)} />
-                    <AvatarFallback className="bg-white text-[#313D6A] text-2xl">
-                      {isAdmin ? `${tutor.first_name[0]}${tutor.last_name[0]}` : `T${tutor.id}`}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h1 className="text-3xl lg:text-4xl font-bold mb-2">{getDisplayName(tutor)}</h1>
-                    {isAdmin && <p className="text-lg text-gray-200 mb-2">@{tutor.username}</p>}
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-yellow-400" />
-                        <span>4.8 (150+ reviews)</span>
+      {/* Main grid: left extreme, center content, right extreme */}
+      <div className="w-full">
+        <div className="grid grid-cols-12 gap-6 max-w-[1200px]">
+          {/* Left Sidebar - extreme left (col-span-2) */}
+          <aside className="col-span-12 lg:col-span-3 px-4 lg:px-0">
+            <div className="h-full">
+              <Card className="bg-[#313D6A] text-white border-0 lg:rounded-r-2xl lg:rounded-l-none rounded-xl overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="text-center mb-6">
+                    <Avatar className="h-28 w-28 mx-auto mb-4 border-4 border-[#F5BB07]">
+                      <AvatarImage src={tutor.profile_picture || "/placeholder.svg"} alt={getDisplayName(tutor)} />
+                      <AvatarFallback className="bg-[#F5BB07] text-[#313D6A] text-2xl font-bold">
+                        {isAdmin ? `${tutor.first_name?.[0] ?? "T"}${tutor.last_name?.[0] ?? "#"}` : `T${tutor.id}`}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <h2 className="text-xl font-bold mb-2">Tutor ID: PT{tutor.id}</h2>
+                    <p className="text-sm text-gray-300 mb-4">Member Since {tutor.member_since || "N/A"}</p>
+                  </div>
+
+                  <div className="space-y-3 mb-6 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-[#F5BB07] font-semibold">Age:</span>
+                      <span>{tutor.age ?? "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#F5BB07] font-semibold">City:</span>
+                      <span>{tutor.city ?? "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#F5BB07] font-semibold">Province:</span>
+                      <span>{tutor.province ?? "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#F5BB07] font-semibold">Country:</span>
+                      <span>{tutor.country ?? "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#F5BB07] font-semibold">Nationality:</span>
+                      <span>{tutor.nationality ?? "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#F5BB07] font-semibold">Gender:</span>
+                      <span>{tutor.gender ?? "-"}</span>
+                    </div>
+                  </div>
+
+                  {/* <div className="flex justify-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+                      <Facebook className="h-4 w-4" />
+                    </div>
+                    <div className="w-8 h-8 bg-pink-500 rounded flex items-center justify-center">
+                      <Instagram className="h-4 w-4" />
+                    </div>
+                    <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center">
+                      <Youtube className="h-4 w-4" />
+                    </div>
+                    <div className="w-8 h-8 bg-blue-400 rounded flex items-center justify-center">
+                      <Twitter className="h-4 w-4" />
+                    </div>
+                  </div> */}
+                  <div className="flex justify-center space-x-3">
+                    <Button className="bg-[#F5BB07] hover:bg-[#F5BB07]/90 text-[#313D6A]">Book a session</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </aside>
+
+          {/* Center Content */}
+          <main className="col-span-12 lg:col-span-6 space-y-6">
+            {/* Qualification */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="bg-[#F5BB07] text-[#313D6A] py-3">
+                <CardTitle className="text-lg font-bold flex items-center">
+                  <Award className="h-5 w-5 mr-2" />
+                  Qualification
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 font-semibold">Degree</th>
+                        <th className="text-left py-2 font-semibold">Subject</th>
+                        <th className="text-left py-2 font-semibold">Passing Year</th>
+                        <th className="text-left py-2 font-semibold">Institute</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(tutor.education ?? []).map((edu, index) => (
+                        <tr key={index} className="border-b">
+                          <td className="py-2">{edu.degree}</td>
+                          <td className="py-2">{edu.subject ?? tutor.expertise_areas?.[0] ?? "General"}</td>
+                          <td className="py-2">{edu.year}</td>
+                          <td className="py-2">{edu.institution}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Experience */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="bg-[#313D6A] text-white py-3">
+                <CardTitle className="text-lg font-bold flex items-center">
+                  <Star className="h-5 w-5 mr-2" />
+                  Experience
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 font-semibold">Position</th>
+                        <th className="text-left py-2 font-semibold">From</th>
+                        <th className="text-left py-2 font-semibold">To</th>
+                        <th className="text-left py-2 font-semibold">Institute</th>
+                        <th className="text-left py-2 font-semibold">Experience</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(tutor.experience ?? []).length > 0 ? (
+                        (tutor.experience ?? []).map((exp, i) => (
+                          <tr key={i} className="border-b">
+                            <td className="py-2">{exp.position}</td>
+                            <td className="py-2">{exp.from}</td>
+                            <td className="py-2">{exp.to}</td>
+                            <td className="py-2">{exp.institute}</td>
+                            <td className="py-2">{exp.years}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="py-4 text-center text-gray-500">
+                            No experience listed.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Demo Video */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="bg-[#F5BB07] text-[#313D6A] py-3">
+                <CardTitle className="text-lg font-bold flex items-center">
+                  <Play className="h-5 w-5 mr-2" />
+                  Demo Video
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {tutor.videos?.length > 0 ? tutor.videos.map((v, i) => (
+                    <div key={i} className="relative bg-gray-100 rounded-lg overflow-hidden aspect-video">
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <div className="w-16 h-16 bg-[#F5BB07] rounded-full flex items-center justify-center">
+                          <Play className="h-8 w-8 text-[#313D6A] ml-1" />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        <span>500+ students</span>
+                      <img src={v.thumbnail} alt={v.title} className="w-full h-full object-cover" />
+                    </div>
+                  )) : (
+                    <div className="col-span-2">
+                      <div className="py-4 text-center text-gray-500">
+                        No videos available.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </main>
+
+          {/* Right Sidebar - extreme right (col-span-2) */}
+          <aside className="col-span-12 lg:col-span-3 px-4 lg:px-0">
+            <div className="h-full">
+              <Card className="bg-[#FFFCE0] border-2 border-[#F5BB07] lg:rounded-l-2xl lg:rounded-r-none rounded-xl overflow-hidden">
+                <CardHeader className="bg-[#313D6A] text-white py-3">
+                  <CardTitle className="text-lg font-bold flex items-center">
+                    <Users className="h-5 w-5 mr-2" />
+                    Professional Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 space-y-4">
+                  {/* Days Availability */}
+                  <div>
+                    <div className="bg-[#313D6A] text-white px-3 py-2 rounded-t text-sm font-semibold">Days Availability</div>
+                    <div className="bg-white p-3 rounded-b border border-gray-200 space-y-1">
+                      {getAvailabilityDays(tutor.availability_schedule).map((slot, index) => (
+                        <div key={index} className="flex items-center text-sm">
+                          <CheckCircle className="h-3 w-3 text-green-500 mr-2" />
+                          <span>{slot.day}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Time Availability */}
+                  <div>
+                    <div className="bg-[#313D6A] text-white px-3 py-2 rounded-t text-sm font-semibold">Time Availability</div>
+                    <div className="bg-white p-3 rounded-b border border-gray-200">
+                      <div className="flex items-center text-sm">
+                        <Clock className="h-4 w-4 text-[#F5BB07] mr-2" />
+                        <span>{tutor.time_availability ?? "Morning, Evening"}</span>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <p className="text-lg text-gray-200 mb-6">
-                  {tutor.bio ||
-                    "Experienced educator passionate about teaching and helping students achieve their academic goals through personalized learning approaches."}
-                </p>
-
-                <div className="flex flex-wrap gap-2">
-                  {tutor.expertise_areas.map((area, index) => (
-                    <Badge key={index} className="bg-[#F5BB07] text-white">
-                      {area}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div className="text-center lg:text-right">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
-                  <div className="text-2xl font-bold mb-2">$45/hour</div>
-                  <p className="text-sm text-gray-200 mb-4">Starting rate</p>
-                  <Button className="w-full bg-[#F5BB07] hover:bg-[#F5BB07]/90 text-[#313D6A] font-semibold">
-                    Book a Session
-                  </Button>
-                  {isAdmin && (
-                    <Button
-                      variant="outline"
-                      className="w-full mt-2 border-white text-white hover:bg-white hover:text-[#313D6A] bg-transparent"
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Contact Tutor
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Tutor Details */}
-            <div className="lg:col-span-2">
-              <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="education">Education</TabsTrigger>
-                  <TabsTrigger value="availability">Schedule</TabsTrigger>
-                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="overview" className="mt-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-[#313D6A]">About This Tutor</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div>
-                        <h3 className="font-semibold mb-3">Expertise Areas</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {tutor.expertise_areas.map((area, index) => (
-                            <Badge key={index} variant="secondary" className="bg-[#313D6A]/10 text-[#313D6A]">
-                              {area}
-                            </Badge>
-                          ))}
-                        </div>
+                  {/* Area, Online, Home, Subjects, Languages, Fee - kept the same but safe-guarded */}
+                  <div>
+                    <div className="bg-[#313D6A] text-white px-3 py-2 rounded-t text-sm font-semibold">Areas To Teach</div>
+                    <div className="bg-white p-3 rounded-b border border-gray-200">
+                      <div className="flex items-center text-sm">
+                        <Globe className="h-4 w-4 text-[#F5BB07] mr-2" />
+                        <span>{(tutor.expertise_areas || []).join(", ") || "N/A"}</span>
                       </div>
+                    </div>
+                  </div>
 
-                      <div>
-                        <h3 className="font-semibold mb-3">Course Categories</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {tutor.course_categories.map((category, index) => (
-                            <Badge key={index} className="bg-[#F5BB07]/20 text-[#313D6A]">
-                              {category}
-                            </Badge>
-                          ))}
-                        </div>
+                  <div>
+                    <div className="bg-[#313D6A] text-white px-3 py-2 rounded-t text-sm font-semibold">Available For Online Teaching</div>
+                    <div className="bg-white p-3 rounded-b border border-gray-200">
+                      <div className="text-sm">
+                        <div className={`font-semibold ${tutor.online ? "text-green-600" : "text-gray-600"}`}>{tutor.online ? "Yes" : "No"}</div>
+                        {/* <div className="text-gray-600">Method: {tutor.online_method ?? "Zoom"}</div> */}
                       </div>
+                    </div>
+                  </div>
 
-                      <div>
-                        <h3 className="font-semibold mb-3">Teaching Methods</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {tutor.preferred_teaching_methods.map((method, index) => (
-                            <Badge key={index} variant="outline" className="border-[#313D6A]/30 text-[#313D6A]">
-                              {method}
-                            </Badge>
-                          ))}
-                        </div>
+                  <div>
+                    <div className="bg-[#313D6A] text-white px-3 py-2 rounded-t text-sm font-semibold">Home Tutoring Status</div>
+                    <div className="bg-white p-3 rounded-b border border-gray-200">
+                      <div className="text-sm">
+                        <div className={`font-semibold ${tutor.home_tutoring ? "text-green-600" : "text-gray-600"}`}>{tutor.home_tutoring ? "Yes" : "No"}</div>
+                        <div className="text-gray-600">City: {tutor.city ?? "-"}</div>
+                        <div className="text-gray-600">Transport: {tutor.transport ?? "-"}</div>
                       </div>
+                    </div>
+                  </div>
 
-                      <div>
-                        <h3 className="font-semibold mb-3">Languages Spoken</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {tutor.languages_spoken.map((language, index) => (
-                            <div key={index} className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
-                              <Globe className="h-4 w-4 text-[#313D6A]" />
-                              <span className="text-sm">{language}</span>
-                            </div>
-                          ))}
+                  <div>
+                    <div className="bg-[#313D6A] text-white px-3 py-2 rounded-t text-sm font-semibold">Offering Subjects</div>
+                    <div className="bg-white p-3 rounded-b border border-gray-200 space-y-1 text-sm">
+                      {(tutor.expertise_areas ?? []).map((subject, index) => (
+                        <div key={index}>
+                          {/* <span className="font-semibold">{subject}</span> <span className="text-gray-600">(A-Levels)</span> */}
+                          <span className="font-semibold">{subject}</span> <span className="text-gray-600"></span>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                      ))}
+                    </div>
+                  </div>
 
-                <TabsContent value="education" className="mt-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-[#313D6A]">Educational Background</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-6">
-                        {tutor.education.map((edu, index) => (
-                          <div key={index} className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg">
-                            <div className="bg-[#313D6A] p-2 rounded-full">
-                              <Award className="h-5 w-5 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-[#313D6A] text-lg">{edu.degree}</h3>
-                              <p className="text-gray-600 mb-1">{edu.institution}</p>
-                              <p className="text-sm text-gray-500">Graduated: {edu.year}</p>
-                            </div>
+                  <div>
+                    <div className="bg-[#313D6A] text-white px-3 py-2 rounded-t text-sm font-semibold">Teaching Language</div>
+                    <div className="bg-white p-3 rounded-b border border-gray-200">
+                      <div className="text-sm">{(tutor.languages_spoken ?? []).join(" & ") || "N/A"}</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="bg-[#313D6A] text-white px-3 py-2 rounded-t text-sm font-semibold">Fee</div>
+                    <div className="bg-white p-3 rounded-b border border-gray-200">
+                      <div className="text-sm font-semibold text-[#313D6A]">Charge/Hour: {tutor.fee ?? "N/A"}</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="bg-[#313D6A] text-white px-3 py-2 rounded-t text-sm font-semibold">Languages</div>
+                    <div className="bg-white p-3 rounded-b border border-gray-200 space-y-2">
+                      {(tutor.languages_spoken ?? []).map((language, index) => (
+                        <div key={index} className="flex items-center justify-between text-sm">
+                          <span>{language}</span>
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className="h-3 w-3 text-[#F5BB07] fill-current" />
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="availability" className="mt-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-[#313D6A]">Weekly Availability</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {getAvailabilityDays(tutor.availability_schedule).map((slot, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <Calendar className="h-5 w-5 text-[#313D6A]" />
-                              <span className="font-medium">{slot.day}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4 text-gray-500" />
-                              <span className="text-sm text-gray-600">{slot.time}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="reviews" className="mt-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-[#313D6A]">Student Reviews</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-6">
-                        {/* Mock reviews */}
-                        {[
-                          {
-                            name: "Sarah M.",
-                            rating: 5,
-                            comment: "Excellent tutor! Very patient and explains concepts clearly.",
-                            date: "2 weeks ago",
-                          },
-                          {
-                            name: "John D.",
-                            rating: 5,
-                            comment: "Helped me improve my grades significantly. Highly recommended!",
-                            date: "1 month ago",
-                          },
-                          {
-                            name: "Emily R.",
-                            rating: 4,
-                            comment: "Great teaching style and very knowledgeable in the subject.",
-                            date: "1 month ago",
-                          },
-                        ].map((review, index) => (
-                          <div key={index} className="border-b border-gray-200 pb-6 last:border-b-0">
-                            <div className="flex items-start gap-4">
-                              <Avatar>
-                                <AvatarFallback className="bg-[#313D6A] text-white">
-                                  {review.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-2">
-                                  <h4 className="font-semibold">{review.name}</h4>
-                                  <span className="text-sm text-gray-500">{review.date}</span>
-                                </div>
-                                <div className="flex items-center gap-1 mb-2">
-                                  {Array.from({ length: 5 }).map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`h-4 w-4 ${
-                                        i < review.rating ? "text-yellow-400 fill-current" : "text-gray-300"
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
-                                <p className="text-gray-600">{review.comment}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </div>
-
-            {/* Right Column - Quick Info */}
-            <div className="lg:col-span-1">
-              <div className="space-y-6">
-                <Card className="sticky top-6">
-                  <CardHeader>
-                    <CardTitle className="text-[#313D6A]">Quick Info</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Response Time</span>
-                      <span className="font-medium">Within 2 hours</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Total Students</span>
-                      <span className="font-medium">500+</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Success Rate</span>
-                      <span className="font-medium text-green-600">95%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Experience</span>
-                      <span className="font-medium">5+ years</span>
-                    </div>
-                    {isAdmin && (
-                      <div className="pt-4 border-t">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-gray-600">Email</span>
                         </div>
-                        <p className="text-sm text-[#313D6A] break-all">{tutor.email}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                      ))}
+                    </div>
+                  </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-[#313D6A]">Achievements</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      <span className="text-sm">Top Rated Tutor</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      <span className="text-sm">500+ Hours Taught</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      <span className="text-sm">Verified Education</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      <span className="text-sm">Background Checked</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </div>

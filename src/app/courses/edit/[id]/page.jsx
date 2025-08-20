@@ -19,7 +19,7 @@ export default function CreateCoursePage() {
     const { id } = params || {}
     // console.log("id", id) // comment out or keep for debugging (avoid infinite spam)
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"
 
     const [isLoading, setIsLoading] = useState(false)
     const [course, setCourse] = useState(null)

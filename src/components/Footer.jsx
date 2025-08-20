@@ -1,15 +1,26 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react"
-
+import Link from "next/link"
+import Image from "next/image"
 export default function Footer() {
   return (
-    <footer className="bg-slate-800 text-white">
+    <footer className="bg-gradient-to-b from-primary/80 to-primary/95 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-yellow-500">Pen Tutor</h3>
+            {/* <h3 className="text-2xl font-bold text-yellow-500">Pen Tutor</h3> */}
+            {/* Replace your Image block with this */}
+            <div className="relative w-40 h-20 md:w-56 md:h-20">
+              <Image
+                src="/logo.png"
+                alt="Pen Tutor Logo"
+                fill
+                className="object-contain w-full h-full rounded-lg"
+              />
+            </div>
+
             <p className="text-gray-300 leading-relaxed">
               Connecting students with qualified tutors for personalized learning experiences.
             </p>
@@ -26,29 +37,29 @@ export default function Footer() {
             <h4 className="text-lg font-semibold">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-300 hover:text-yellow-500 transition-colors">
+                <Link href="/our-tutors" className="text-gray-300 hover:text-yellow-500 transition-colors">
                   Find a Tutor
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-yellow-500 transition-colors">
+                <Link href="/profile?form=tutor" className="text-gray-300 hover:text-yellow-500 transition-colors">
                   Become a Tutor
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-yellow-500 transition-colors">
+                <Link href="#" className="text-gray-300 hover:text-yellow-500 transition-colors">
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-yellow-500 transition-colors">
+                <Link href="#" className="text-gray-300 hover:text-yellow-500 transition-colors">
                   Contact
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-yellow-500 transition-colors">
+                <Link href="#" className="text-gray-300 hover:text-yellow-500 transition-colors">
                   FAQ
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -63,11 +74,11 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-4 w-4 text-yellow-500" />
-                <span className="text-gray-300">+1 (555) 123-4567</span>
+                <span className="text-gray-300">+92 300 1118187</span>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="h-4 w-4 text-yellow-500" />
-                <span className="text-gray-300">123 Education St, Learning City</span>
+                <span className="text-gray-300">Johar Town, Lahore, Pakistan</span>
               </div>
             </div>
           </div>
@@ -88,7 +99,7 @@ export default function Footer() {
 
         <div className="border-t border-slate-700 mt-8 pt-8 text-center">
           <p className="text-gray-400 text-sm">
-            © 2024 Pen Tutor. All rights reserved. | Privacy Policy | Terms of Service
+            © {new Date().getFullYear()} Pen Tutor. All rights reserved. | Privacy Policy | Terms of Service
           </p>
         </div>
       </div>

@@ -86,7 +86,7 @@ export default function TopNavigation() {
               </DropdownMenu>
             ) : (
               <div className="flex items-center space-x-3">
-                <Button asChild variant="ghost">
+                <Button asChild variant="outline">
                   <Link href="/auth">Login</Link>
                 </Button>
                 <Button asChild>

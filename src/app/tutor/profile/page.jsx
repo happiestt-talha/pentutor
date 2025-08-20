@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import TutorSidebar from "@/components/tutor-sidebar";
+// import TutorSidebar from "@/components/tutor-sidebar";
 import axios from "axios";
 
 import {
@@ -77,7 +77,7 @@ export default function TutorProfilePage() {
   if (loading) {
     return (
       <div className="flex h-screen">
-        <TutorSidebar />
+        {/* <TutorSidebar /> */}
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#313D6A] mx-auto mb-4"></div>
@@ -91,7 +91,7 @@ export default function TutorProfilePage() {
   if (error || !profile) {
     return (
       <div className="flex h-screen">
-        <TutorSidebar />
+        {/* <TutorSidebar /> */}
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-600 mb-4">Error: {error || "Profile not found"}</p>
@@ -136,7 +136,7 @@ export default function TutorProfilePage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <TutorSidebar />
+      {/* <TutorSidebar /> */}
 
       <div className="flex-1 overflow-y-auto">
         <div className="p-8">

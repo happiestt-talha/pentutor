@@ -8,25 +8,26 @@ import Footer from "@/components/Footer"
 
 import stdBags from "@/assets/images/student_with_bags.png"
 import lady from "@/assets/images/lady.png"
-import classroom from "@/assets/images/classroom.jpg"
 import studentSmiling from "@/assets/images/std.png"
+import whyChooseUS from "@/assets/images/why-choose-us.png"
 import Link from "next/link"
+import QueryForm from "@/components/home/query-form"
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-yellow-100 to-yellow-200 overflow-hidden">
-        <div className="container mx-auto px-4 pt-12 lg:pt-20">
+      <section className="relative bg-gradient-to-r from-yellow-100 to-tertiary overflow-hidden">
+        <div className="container mx-auto px-4 pt-12 lg:pt-16">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-6">
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900">Welcome To Pen Tutor</h1>
-              <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg inline-block">
+            <div className="flex flex-col h-full py-8 items-start justify-start">
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Welcome To Pen Tutor</h1>
+              {/* <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg inline-block">
                 <Link href="/profile" className="font-semibold">Become our part</Link>
-              </div>
+              </div> */}
             </div>
             <div className="relative flex justify-center items-center">
-              <div className="absolute h-[200px] w-[200px] lg:h-[250px] lg:w-[250px] bg-yellow-400 rounded-full opacity-50 -top-8 lg:-top-12"></div>
+              <div className="absolute h-[200px] w-[200px] lg:h-[250px] lg:w-[250px] bg-yellow-400 rounded-full opacity-50 right-3 -top-8 lg:-top-12"></div>
               <Image
                 src={stdBags}
                 alt="Students with backpacks"
@@ -40,36 +41,8 @@ export default function HomePage() {
       </section>
 
       {/* Query Form Section */}
+      <QueryForm />
       {/* <section className="bg-slate-800 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="space-y-4">
-              <label className="text-white font-medium block">Name</label>
-              <Input placeholder="Enter your name" className="bg-white" />
-              <Input placeholder="Enter your email" className="bg-white" />
-            </div>
-            <div className="space-y-4">
-              <label className="text-white font-medium block">Departments</label>
-              <Input placeholder="Select department" className="bg-white" />
-              <Input placeholder="Select subject" className="bg-white" />
-            </div>
-            <div className="space-y-4">
-              <label className="text-white font-medium block">Tuition</label>
-              <Input placeholder="Select tuition type" className="bg-white" />
-              <Input placeholder="Verify information" className="bg-white" />
-            </div>
-          </div>
-          <div></div>
-          <div className="text-center mt-8">
-            <div className="bg-yellow-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
-              <span className="text-gray-900 font-bold">
-                <FaArrowRightLong />
-              </span>
-            </div>
-          </div>
-        </div>
-      </section> */}
-      <section className="bg-slate-800 py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center text-white">
             <h2 className="text-2xl lg:text-3xl font-extrabold">Need help with studies? Get a trusted tutor in 24 hours.</h2>
@@ -83,8 +56,7 @@ export default function HomePage() {
                 </Button>
               </Link>
 
-              <Link href="/" className="inline-flex items-center text-sm text-gray-300 hover:text-white">
-              {/* <Link href="/how-it-works" className="inline-flex items-center text-sm text-gray-300 hover:text-white"> */}
+              <Link href="/how-it-works" className="inline-flex items-center text-sm text-gray-300 hover:text-white">
                 <span>How it works</span>
                 <FaArrowRightLong className="ml-2" />
               </Link>
@@ -93,7 +65,7 @@ export default function HomePage() {
             <div className="mt-6 text-sm text-gray-400">No sign-up required to browse. Safe, vetted, and local tutors.</div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* For Students Section */}
       <section className="py-16 bg-gray-50">
@@ -174,9 +146,11 @@ export default function HomePage() {
               <div className="grid lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <p className="text-gray-600 leading-relaxed">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent feugiat lacinia risus porta est.
-                    Ornare orci vitae, sit pharetra sed. Sollicitudin nunc, libero et varius maximus blandit. Velit
-                    amet, aliquet suscipit amet, libero commodo.
+                    {/* Pen Tutor is a 'Network of Trained Tutors' committed to provide you highly qualified & experienced Online & Home tutoring services, individual and group sessions anywhere, anytime. */}
+
+                    {/* Pen Tutor provides the best conceptual study environment. Our staff is equipped with unique teaching techniques and methodologies. Our mode of teaching is flexible, engaging and advanced. We keep the deficiencies and needs of students in focus to cover the gaps. we provide the best and right Tutors. */}
+
+                    Pen Tutor is your personalized tutoring service to fit your needs. Our goal is to provide a world-class education to anyone, anywhere. We focus on skill mastering to help learners establish strong basics so there is no limit to what they can pursue next!
                   </p>
                   <ul className="space-y-3">
                     {[
@@ -197,7 +171,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex justify-center items-center">
                   <Image
-                    src={classroom}
+                    src={whyChooseUS}
                     alt="Tutoring session"
                     width={300}
                     height={250}

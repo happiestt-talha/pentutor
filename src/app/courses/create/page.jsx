@@ -17,7 +17,7 @@ export default function CreateCoursePage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"
   const [formData, setFormData] = useState({
     title: "",
     description: "",
