@@ -26,7 +26,7 @@ export default function CoursesPage() {
   const [totalCourses, setTotalCourses] = useState(0)
   const coursesPerPage = 12
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000"
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
   const fetchCourses = async () => {
     try {
